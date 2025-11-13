@@ -91,6 +91,7 @@ General notes:
 - Cannon shoots multiple projectiles in a line based on last movement command (e.g. if going from **W** to **S**, Cannon will shoot horizontal spread, or if going from **Sp** to **WSp**, Cannon will shoot vertical spread). Ricochet only applies to middle projectile. Move and fuel consumption strength increased.
 - If the Player is hit by a Cannon projectile, the Player gains that projectile's remaining ricochet charges + 1 as spin charges (and the projectile is consumed). Ricochet smart targeting can now also target the Player.
 - When the player has ricochet spin charges, their next Cannon shot slows down time first (i.e. rmb down slows time until rmb up, and Cannon fires on rmb up instead of down).
+- Ricochet smart targeting will now still apply even after a wall collision. Cannon fuel cost tripled.
 
 ### General effect ideas
 - Gain 2 seconds of infinite fuel whenever killing methods are alternated between Vacuum and Cannon (ricochet does not interrupt).
