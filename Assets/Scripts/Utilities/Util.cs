@@ -17,7 +17,7 @@ public static class Util {
 	//	return BoidSteerer.StepWanderPoint2D(prevWanderPoint, wanderLimitRadius, wanderChangeDist);
 	//}
 
-	public static uint GenerateSeed(Transform transform) {
+	public static uint GenerateSeedFromTransform(Transform transform) {
 		// uh um random weird code go
 		float3 pos = transform.position;
 		float val = (
@@ -40,12 +40,14 @@ public static class Util {
 	/// <summary>
 	/// A value of 0 is cold, a value of 1 is hot.<br/>
 	/// The heatmap is in 5 colors. In cold to hot:<br/>
-	/// 0-------0.25-----0.5--------0.75------1<br/>
-	/// Blue -> Cyan -> Green -> Yellow -> Red
+	/// <code>
+	///	Blue    Cyan     Green    Yellow    Red
+	///	[0]----[0.25]----[0.5]----[0.75]----[1]
+	/// </code>
 	/// </summary>
-	/// <param name="perc"></param>
-	/// <returns></returns>
-	public static Color MakeHeatmapColor(float heat) {
+	/// <param name="heat">Heat level. See function description to determine corresponding color.</param>
+	/// <returns>Mapped color.</returns>
+	public static Color MakeHeatmapColor(in float heat) {
 		if (heat < 0.25f)
 			return Color.Lerp(Color.blue, Color.cyan, heat / 0.25f);
 		else if (heat < 0.5f)
@@ -54,6 +56,40 @@ public static class Util {
 			return Color.Lerp(Color.green, Color.yellow, (heat - 0.5f) / 0.25f);
 		else
 			return Color.Lerp(Color.yellow, Color.red, (heat - 0.75f) / 0.25f);
+	}
+
+	/// <summary>
+	/// Provides a lerped color based on color segments. The created levels look like this:<br/>
+	/// <code>
+	/// c1       c2        c3
+	/// [0]-----[lv2]-----[1]
+	/// </code>
+	/// <br/>
+	/// <b>Example:</b><br/>
+	/// Given c1=Red, c2=Green, c3=Blue, lv2=0.8, the segments become:
+	/// <code>
+	/// Red         Green Blue
+	/// [0]---------[0.8]-[1]
+	/// </code>
+	/// ...and the resulting Color from varius perc values would be:
+	/// <list type="bullet">
+	/// <item>perc=0.5 would give you a color 5/8ths the way to Green from Red.</item>
+	/// <item>perc=0.8 would give you exactly Green.</item>
+	/// <item>perc=0.9 would give you a color 50% between Green and Blue.</item>
+	/// </list>
+	/// </summary>
+	/// <param name="c1">Color at perc 0.</param>
+	/// <param name="c2">Color at perc lv2.</param>
+	/// <param name="c3">Color at perc 1.</param>
+	/// <param name="lv2">The resulting lerped color. Ensure that this is not exactly 0 or 1.
+	/// This function will not check for you.</param>
+	/// <param name="perc">Percent within the overall color segments you've set.</param>
+	/// <returns></returns>
+	public static Color LerpColor3Levels(in Color c1, in Color c2, in Color c3, in float lv2, in float perc) {
+		if (perc <= lv2)
+			return Color.Lerp(c1, c2, perc / lv2);
+		else
+			return Color.Lerp(c2, c3, (perc - lv2) / (1f - lv2));
 	}
 
 	/// <summary>

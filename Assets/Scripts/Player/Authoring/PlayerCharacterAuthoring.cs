@@ -10,8 +10,8 @@ class PlayerCharacterAuthoring : MonoBehaviour {
     public GameObject PivotEntity;
     public GameObject ViewEntity;
     
-    public float VacuumMoveForce = 10f;
-    public float CannonMoveForce = 100f;
+    public float VacuumMoveForce = 3f;
+    public float CannonMoveForce = 10f;
 
     public float PivotRotationSpeed = 25f;
 

@@ -47,17 +47,20 @@ partial struct PlayerFixedStepControlSystem : ISystem {
 				}
 
 				// Acceleration vector
-				float3 characterForward = MathUtilities.GetForwardFromRotation(characterRotation);
-				float3 characterRight = MathUtilities.GetRightFromRotation(characterRotation);
-				float3 characterUp = MathUtilities.GetUpFromRotation(characterRotation);
-				if (!Util.IsNearZero(characterControl.OrientationInput))
-					characterControl.AccelVector = math.normalizesafe(
-						characterControl.OrientationInput.z * characterForward
-						+ characterControl.OrientationInput.x * characterRight
-						+ characterControl.OrientationInput.y * characterUp
-					);
-				else
-					characterControl.AccelVector = float3.zero;
+				PlayerCharacterComponent charComp = SystemAPI.GetComponent<PlayerCharacterComponent>(player.ControlledCharacter);
+				quaternion camrot = charComp.ViewLocalRotation;
+				characterControl.AccelVector = math.mul(camrot, characterControl.OrientationInput);
+				//float3 characterForward = MathUtilities.GetForwardFromRotation(characterRotation);
+				//float3 characterRight = MathUtilities.GetRightFromRotation(characterRotation);
+				//float3 characterUp = MathUtilities.GetUpFromRotation(characterRotation);
+				//if (!Util.IsNearZero(characterControl.OrientationInput))
+				//	characterControl.AccelVector = math.normalizesafe(
+				//		characterControl.OrientationInput.z * characterForward
+				//		+ characterControl.OrientationInput.x * characterRight
+				//		+ characterControl.OrientationInput.y * characterUp
+				//	);
+				//else
+				//	characterControl.AccelVector = float3.zero;
 
 
 				//if (playerInputs.IsVacuumDown || playerInputs.IsCannonDown) {

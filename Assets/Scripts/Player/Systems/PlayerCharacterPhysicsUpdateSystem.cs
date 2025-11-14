@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.CharacterController;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
@@ -35,20 +36,27 @@ partial struct PlayerCharacterPhysicsUpdateSystem : ISystem {
 			RefRO<PlayerCharacterControl>,
 			RefRW<LocalTransform>,
 			RefRW<PhysicsVelocity>,
-			RefRO<PhysicsMass>
+			RefRW<PhysicsMass>
 			>().WithAll<Simulate>()) {
-			if (characterControl.ValueRO.IsVacuumDownThisFrame()) {
-				Debug.Log($"Vacuum down | {SystemAPI.Time.ElapsedTime}");
+			pm.ValueRW.InverseInertia = float3.zero;
+
+			// TODO: Figure out a way to do this scalably with roguelike effects that can change weapon behaviors
+			// TODO: Activate a Vacuum component for collision, vfx, sound, etc. to read and act on
+			if (characterControl.ValueRO.IsVacuumActive()) {
+				pv.ValueRW.Linear = characterControl.ValueRO.AccelVector * charComponent.ValueRO.VacuumMoveForce + pv.ValueRO.Linear;
 			}
-			if (characterControl.ValueRO.IsVacuumUpThisFrame()) {
-				Debug.Log($"Vacuum up | {SystemAPI.Time.ElapsedTime}");
-			}
-			if (characterControl.ValueRO.IsCannonDownThisFrame()) {
-				Debug.Log($"Cannon down | {SystemAPI.Time.ElapsedTime}");
-			}
-			if (characterControl.ValueRO.IsCannonUpThisFrame()) {
-				Debug.Log($"Cannon up | {SystemAPI.Time.ElapsedTime}");
-			}
+			//if (characterControl.ValueRO.IsVacuumDownThisFrame()) {
+			//	Debug.Log($"Vacuum down | {SystemAPI.Time.ElapsedTime}");
+			//}
+			//if (characterControl.ValueRO.IsVacuumUpThisFrame()) {
+			//	Debug.Log($"Vacuum up | {SystemAPI.Time.ElapsedTime}");
+			//}
+			//if (characterControl.ValueRO.IsCannonDownThisFrame()) {
+			//	Debug.Log($"Cannon down | {SystemAPI.Time.ElapsedTime}");
+			//}
+			//if (characterControl.ValueRO.IsCannonUpThisFrame()) {
+			//	Debug.Log($"Cannon up | {SystemAPI.Time.ElapsedTime}");
+			//}
 		}
 
 	}
