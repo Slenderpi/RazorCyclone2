@@ -30,10 +30,6 @@ partial struct PlayerFixedStepControlSystem : ISystem {
 				quaternion characterRotation = SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Rotation;
 
 				// Weapon info
-				//characterControl.VacuumDown = inputs.VacuumState.IsDown(tick);
-				//characterControl.VacuumUp = inputs.VacuumState.IsUp(tick);
-				//characterControl.CannonDown = inputs.CannonState.IsDown(tick);
-				//characterControl.CannonUp = inputs.CannonState.IsUp(tick);
 				characterControl.UpdateVacuumInput(inputs.VacuumState.IsDown(tick), inputs.VacuumState.IsUp(tick));
 				characterControl.UpdateCannonInput(inputs.CannonState.IsDown(tick), inputs.CannonState.IsUp(tick));
 
@@ -47,9 +43,10 @@ partial struct PlayerFixedStepControlSystem : ISystem {
 				}
 
 				// Acceleration vector
-				PlayerCharacterComponent charComp = SystemAPI.GetComponent<PlayerCharacterComponent>(player.ControlledCharacter);
-				quaternion camrot = charComp.ViewLocalRotation;
-				characterControl.AccelVector = math.mul(camrot, characterControl.OrientationInput);
+				//PlayerCharacterComponent charComp = SystemAPI.GetComponent<PlayerCharacterComponent>(player.ControlledCharacter);
+				//quaternion camrot = charComp.ViewLocalRotation;
+				//characterControl.AccelVector = math.mul(camrot, characterControl.OrientationInput);
+				//Util.D_DrawArrowCenteredAt(SystemAPI.GetComponent<LocalToWorld>(player.ControlledCharacter).Position, characterControl.AccelVector, 5, Color.magenta, SystemAPI.Time.DeltaTime, true);
 				//float3 characterForward = MathUtilities.GetForwardFromRotation(characterRotation);
 				//float3 characterRight = MathUtilities.GetRightFromRotation(characterRotation);
 				//float3 characterUp = MathUtilities.GetUpFromRotation(characterRotation);

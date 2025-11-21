@@ -38,10 +38,10 @@ partial struct PlayerCharacterVariableUpdateSystem : ISystem {
             characterControl
             ) in SystemAPI.Query<
             RefRW<PlayerCharacterComponent>,
-            RefRO<PlayerCharacterControl>
+            RefRW<PlayerCharacterControl>
             >().WithAll<Simulate>()) {
-			if (TryHandleCameraRotation(ref state, charComponent, characterControl.ValueRO, out quaternion camrot) || characterControl.ValueRO.DidOrientationInputChange)
-				UpdatePivotGoalRotation(charComponent, characterControl.ValueRO, camrot);
+			HandleCameraRotation(ref state, charComponent, characterControl, out quaternion camrot);
+			UpdatePivotGoalRotation(charComponent, characterControl.ValueRO, camrot);
 			SlerpPivotRotation(ref state, charComponent.ValueRO);
 		}
 	}
@@ -49,24 +49,27 @@ partial struct PlayerCharacterVariableUpdateSystem : ISystem {
 	[BurstCompile]
 #pragma warning disable IDE0251 // Make member 'readonly'
 #pragma warning disable IDE0060 // Remove unused parameter
-	private bool TryHandleCameraRotation(ref SystemState state, in RefRW<PlayerCharacterComponent> charComponent, in PlayerCharacterControl characterControl, out quaternion camrot) {
+	private bool HandleCameraRotation(ref SystemState state, RefRW<PlayerCharacterComponent> charComponent, RefRW<PlayerCharacterControl> characterControl, out quaternion camrot) {
 		float3 camrotEuler = charComponent.ValueRO.CurrCamRotationDeg;
 		float3 converted;
 		// Only update camera rotation and related values if the mouse has actually moved
-		if (!Util.IsZero(characterControl.LookDegreesDelta)) {
+		if (!Util.IsZero(characterControl.ValueRO.LookDegreesDelta)) {
 			// Compute and clamp pitch
-			float newPitchDegValue = charComponent.ValueRO.CurrCamRotationDeg.x + characterControl.LookDegreesDelta.y;
+			float newPitchDegValue = charComponent.ValueRO.CurrCamRotationDeg.x + characterControl.ValueRO.LookDegreesDelta.y;
 			if (newPitchDegValue > 90f)
 				newPitchDegValue = 90f;
 			else if (newPitchDegValue < -90f)
 				newPitchDegValue = -90f;
 
 			// Save new cam rotation values
-			camrotEuler.y += characterControl.LookDegreesDelta.x; // Yaw
+			camrotEuler.y += characterControl.ValueRO.LookDegreesDelta.x; // Yaw
 			camrotEuler.x = newPitchDegValue; // Pitch
 			charComponent.ValueRW.CurrCamRotationDeg = camrotEuler;
 			Util.DegToRadiansNegPitch(camrotEuler, out converted);
 			camrot = quaternion.Euler(converted);
+
+			// Apply camrot to AccelVector
+			characterControl.ValueRW.AccelVector = math.mul(camrot, characterControl.ValueRO.OrientationInput);
 
 			// Apply rotation to camera
 			LocalTransform camtrans = SystemAPI.GetComponent<LocalTransform>(charComponent.ValueRO.ViewEntity);
@@ -81,7 +84,7 @@ partial struct PlayerCharacterVariableUpdateSystem : ISystem {
 #pragma warning restore IDE0060 // Remove unused parameter
 #pragma warning restore IDE0251 // Make member 'readonly'
 
-	private void UpdatePivotGoalRotation(RefRW<PlayerCharacterComponent> charComponent, PlayerCharacterControl characterControl, quaternion camrot) {
+	private readonly void UpdatePivotGoalRotation(RefRW<PlayerCharacterComponent> charComponent, PlayerCharacterControl characterControl, quaternion camrot) {
 		float3 lookVector = characterControl.OrientationInput;
 		Util.UpForLookRotation(lookVector, out float3 up);
 		charComponent.ValueRW.PivotGoalRotation = quaternion.LookRotation(
@@ -91,6 +94,8 @@ partial struct PlayerCharacterVariableUpdateSystem : ISystem {
 	}
 
 	[BurstCompile]
+#pragma warning disable IDE0060 // Remove unused parameter
+#pragma warning disable IDE0251 // Make member 'readonly'
 	private void SlerpPivotRotation(ref SystemState state, in PlayerCharacterComponent charComponent) {
 		LocalTransform pivtrans = SystemAPI.GetComponent<LocalTransform>(charComponent.PivotEntity);
 		pivtrans.Rotation = math.slerp(
@@ -100,4 +105,6 @@ partial struct PlayerCharacterVariableUpdateSystem : ISystem {
 		);
 		SystemAPI.SetComponent(charComponent.PivotEntity, pivtrans);
 	}
+#pragma warning restore IDE0251 // Make member 'readonly'
+#pragma warning restore IDE0060 // Remove unused parameter
 }
