@@ -101,7 +101,7 @@ partial struct PlayerCharacterVariableUpdateSystem : ISystem {
 		pivtrans.Rotation = math.slerp(
 			pivtrans.Rotation,
 			charComponent.PivotGoalRotation,
-			SystemAPI.Time.DeltaTime * charComponent.PivotRotationSpeed
+			math.min(SystemAPI.Time.DeltaTime * charComponent.PivotRotationSpeed, 1)
 		);
 		SystemAPI.SetComponent(charComponent.PivotEntity, pivtrans);
 	}

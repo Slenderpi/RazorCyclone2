@@ -84,7 +84,7 @@ MonoBehaviour:
   ViewEntity: {fileID: 7372073104297041654}
   VacuumMoveForce: 3
   CannonMoveForce: 10
-  PivotRotationSpeed: 25
+  PivotRotationSpeed: 21
 --- !u!135 &883625867513326471
 SphereCollider:
   m_ObjectHideFlags: 0
